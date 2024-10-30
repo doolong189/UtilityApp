@@ -6,4 +6,11 @@
     </style>
 
     <style name="Theme.UtilityApplication" parent="Base.Theme.UtilityApplication" />
+    <style name="AppBottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/AppModalStyle</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+    <style name="AppModalStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/bg_custom</item>
+    </style>
 </resources>
