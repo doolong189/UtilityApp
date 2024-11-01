@@ -49,6 +49,9 @@ class HomeFragment : Fragment() {
         binding.homeEditVideo.setOnClickListener {
             (activity as MainActivity).replaceFragment(EditVideoFragment())
         }
+        binding.homeEditOther.setOnClickListener {
+        }
+
     }
 
 

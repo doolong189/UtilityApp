@@ -10,83 +10,135 @@
         android:id="@+id/cardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:cardCornerRadius="10dp">
+        app:layout_constraintEnd_toEndOf="parent">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="5dp"
-            >
+            android:padding="5dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Text Settings"
+                android:textStyle="bold"
+                android:textSize="20sp"/>
             <EditText
+                android:id="@+id/dialog_text_edText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Điền chữ vao đây"
-                android:drawableEnd="@drawable/baseline_close_24"
                 android:background="@drawable/bg_custom"
+                android:drawableEnd="@drawable/baseline_close_24"
+                android:hint="Điền chữ vào đây"
                 android:padding="10dp"
+                android:text="MyText" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lề và khoảng cách"
+                android:textStyle="bold"
+                android:layout_margin="5dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Kích cỡ chữ"
+                android:textStyle="bold"
+                android:layout_margin="5dp"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="A"
+                android:textStyle="bold"
                 android:layout_margin="5dp"
-                />
-            <RelativeLayout
+                android:textColor="#000000"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="A"
+                android:textStyle="bold"
+                android:layout_margin="5dp"
+                android:textSize="18sp"
+                android:textColor="#000000"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="A"
+                android:textStyle="bold"
+                android:textSize="25sp"
+                android:layout_margin="5dp"
+                android:textColor="#000000"/>
+        </LinearLayout>
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_margin="5dp"
-                >
+                android:orientation="vertical">
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Màu chữ"
                     android:textStyle="bold"
-                    android:layout_centerVertical="true"
-                    />
-                <View
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_alignParentRight="true"
-                    android:background="@color/black"/>
-            </RelativeLayout>
+                    android:layout_margin="5dp"/>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rc_listColor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    tools:listitem="@layout/list_color"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+            </LinearLayout>
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_margin="5dp"
-                >
+                android:orientation="horizontal">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Màu nền"
-                    android:textStyle="bold"
                     android:layout_centerVertical="true"
-                    />
-                <View
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_alignParentRight="true"
-                    android:background="@color/black"/>
-            </RelativeLayout>
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_margin="5dp"
-                >
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:text="Font"
-                    android:textStyle="bold"
-                    android:layout_centerVertical="true"
-                    />
+                    android:textStyle="bold" />
+
                 <Spinner
+                    android:id="@+id/dialog_text_spFont"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    />
+                    android:layout_alignParentEnd="true" />
             </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/dialog_text_btnExit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/white"
+                    android:text="Thoát"
+                    android:textColor="#FF9800"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/dialog_text_btnSave"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/white"
+                    android:text="OK"
+                    android:textColor="#FF9800"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

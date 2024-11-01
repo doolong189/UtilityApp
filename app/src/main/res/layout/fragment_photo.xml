@@ -23,18 +23,24 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="----"/>
+                android:text=""/>
             <ImageView
                 android:id="@+id/photo_imgInfoFilePath"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/baseline_info_outline_24"/>
         </LinearLayout>
-        <ImageView
-            android:id="@+id/photo_imageView"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:id="@+id/canvas"
+            >
+            <ImageView
+                android:id="@+id/photo_imageView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -110,6 +116,45 @@
                 android:background="@drawable/bg_custom"
                 android:layout_margin="5dp"
                 />
+            <LinearLayout
+                android:id="@+id/photo_layoutColor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="5dp"
+                android:gravity="center"
+                android:background="#000000"
+                android:visibility="gone"
+                >
+                <ImageView
+                    android:id="@+id/photo_iconPickColor"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/baseline_color_lens_24"
+                    android:layout_margin="5dp"/>
+                <ImageView
+                    android:id="@+id/photo_iconBrush"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/outline_brush_24"
+                    android:layout_margin="5dp"/>
+                <ImageView
+                    android:id="@+id/photo_iconReverse"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/baseline_settings_backup_restore_24"
+                    android:layout_margin="5dp"/>
+                <ImageView
+                    android:id="@+id/photo_iconDelete"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/baseline_delete_sweep_24"
+                    android:layout_margin="5dp"/>
+            </LinearLayout>
         </RelativeLayout>
     </LinearLayout>
 </FrameLayout>
