@@ -23,7 +23,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text=""/>
+                android:text="---"/>
             <ImageView
                 android:id="@+id/photo_imgInfoFilePath"
                 android:layout_width="wrap_content"
@@ -153,6 +153,13 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:src="@drawable/baseline_delete_sweep_24"
+                    android:layout_margin="5dp"/>
+                <ImageView
+                    android:id="@+id/photo_iconShowHide"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/baseline_arrow_drop_down_24"
                     android:layout_margin="5dp"/>
             </LinearLayout>
         </RelativeLayout>

@@ -10,7 +10,7 @@ import android.view.MotionEvent
 import android.view.View
 
 
-class MyDrawView(context: Context) : View(context) {
+class MyDrawView(context: Context , colorPicker: Int , size : Float) : View(context) {
 
     private var mBitmap: Bitmap? = null
     private var mCanvas: Canvas? = null
@@ -19,11 +19,11 @@ class MyDrawView(context: Context) : View(context) {
     private val mPaint: Paint = Paint().apply {
         isAntiAlias = true
         isDither = true
-        color = 0xFF000000.toInt()
+        color = colorPicker
         style = Paint.Style.STROKE
         strokeJoin = Paint.Join.ROUND
         strokeCap = Paint.Cap.ROUND
-        strokeWidth = 3f
+        strokeWidth = size
     }
 
     private var mX = 0f
@@ -37,9 +37,7 @@ class MyDrawView(context: Context) : View(context) {
     }
 
     override fun onDraw(canvas: Canvas) {
-        mBitmap?.let {
-            canvas.drawBitmap(it, 0f, 0f, mBitmapPaint)
-        }
+        mBitmap?.let { canvas.drawBitmap(it, 0f, 0f, mBitmapPaint) }
         canvas.drawPath(mPath, mPaint)
     }
 
@@ -90,5 +88,11 @@ class MyDrawView(context: Context) : View(context) {
         mBitmap?.eraseColor(Color.TRANSPARENT)
         invalidate()
         System.gc()
+    }
+
+    fun restore(){
+        mBitmapPaint.color = Color.TRANSPARENT
+        mPath.reset()
+        invalidate()
     }
 }
