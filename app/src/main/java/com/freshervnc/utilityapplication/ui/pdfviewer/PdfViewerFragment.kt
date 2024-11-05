@@ -1,10 +1,13 @@
 package com.freshervnc.utilityapplication.ui.pdfviewer
 
+import android.app.Activity.FOCUSED_STATE_SET
 import android.app.Activity.RESULT_OK
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.pdf.PdfDocument
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -19,9 +22,7 @@ import com.freshervnc.utilityapplication.databinding.DialogChooseConvertPdfBindi
 import com.freshervnc.utilityapplication.databinding.FragmentPdfViewerBinding
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.FileOutputStream
-import java.io.IOException
 
 
 class PdfViewerFragment : Fragment() {
@@ -39,8 +40,13 @@ class PdfViewerFragment : Fragment() {
     ): View {
         // Inflate the layout for this fragment
         binding = FragmentPdfViewerBinding.inflate(layoutInflater, container, false)
-        action()
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        action()
+//        getData()
     }
 
     private fun action() {
@@ -90,11 +96,22 @@ class PdfViewerFragment : Fragment() {
     }
 
     private fun selectImage() {
-        val intent = Intent()
-        intent.setType("image/*")
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-        intent.setAction(Intent.ACTION_GET_CONTENT)
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_MULTIPLE)
+        if (Build.VERSION.SDK_INT < 19) {
+            var intent = Intent()
+            intent.type = "image/*"
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+            intent.action = Intent.ACTION_GET_CONTENT
+            startActivityForResult(
+                Intent.createChooser(intent, "Select Picture")
+                , PICK_IMAGE_MULTIPLE
+            )
+        } else {
+            var intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            intent.type = "image/*"
+            startActivityForResult(intent, PICK_IMAGE_MULTIPLE);
+        }
     }
 
 
@@ -130,35 +147,9 @@ class PdfViewerFragment : Fragment() {
         } else {
             Toast.makeText(requireContext(), "You haven't picked Image", Toast.LENGTH_LONG).show()
         }
+
     }
 
-    //    private fun createPdf(bitmaps: MutableList<Bitmap>) {
-//        if (bitmaps.isEmpty()) {
-//            Toast.makeText(requireContext(), "No images selected", Toast.LENGTH_SHORT).show()
-//            return
-//        }
-//        val pdfDocument = PdfDocument()
-//        try {
-//            bitmaps.forEachIndexed { index, bitmap ->
-//                val pageInfo = PdfDocument.PageInfo.Builder(bitmap.width, bitmap.height, index + 1).create()
-//                val page = pdfDocument.startPage(pageInfo)
-//                page.canvas.drawBitmap(bitmap, 0f, 0f, null)
-//                pdfDocument.finishPage(page)
-//            }
-//            val pdfFile = File(requireContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "pdf_image.pdf")
-//            FileOutputStream(pdfFile).use { outputStream ->
-//                pdfDocument.writeTo(outputStream)
-//            }
-//            Toast.makeText(requireContext(), "PDF saved successfully to ${pdfFile.absolutePath}", Toast.LENGTH_SHORT).show()
-//            Log.e("log o day","PDF saved successfully to ${pdfFile.absolutePath}")
-//        } catch (ex: Exception) {
-//            ex.printStackTrace()
-//            Toast.makeText(requireContext(), "PDF save failed: ${ex.message}", Toast.LENGTH_SHORT).show()
-//            Log.e("log o day","PDF save failed: ${ex.message}")
-//        } finally {
-//            pdfDocument.close()
-//        }
-//    }
     private fun createPdf(bitmaps: MutableList<Bitmap>) {
         if (bitmaps.isEmpty()) {
             Toast.makeText(requireContext(), "No images selected", Toast.LENGTH_SHORT).show()
@@ -199,5 +190,28 @@ class PdfViewerFragment : Fragment() {
         }
     }
 
+
+    //get All image in gallery
+    fun getData(){
+        val allImages = getAllImagesFromGallery(requireContext())
+        Log.e("zzz o day",""+allImages.size)
+        binding.outputImage.setImageURI(allImages[0])
+        position = 0
+    }
+    fun getAllImagesFromGallery(context: Context): List<Uri> {
+        val uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        val projection = arrayOf(MediaStore.Images.Media._ID)
+
+        context.contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+
+            while (cursor.moveToNext()) {
+                val id = cursor.getLong(idColumn)
+                val imageUri = Uri.withAppendedPath(uri, id.toString())
+                mArrayUri.add(imageUri)
+            }
+        }
+        return mArrayUri
+    }
 
 }
