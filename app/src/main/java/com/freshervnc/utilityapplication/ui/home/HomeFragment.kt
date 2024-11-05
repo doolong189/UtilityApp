@@ -17,6 +17,7 @@ import com.freshervnc.utilityapplication.MainActivity
 import com.freshervnc.utilityapplication.R
 import com.freshervnc.utilityapplication.databinding.FragmentHomeBinding
 import com.freshervnc.utilityapplication.ui.photo.PhotoFragment
+import com.freshervnc.utilityapplication.ui.pdfviewer.PdfViewerFragment
 import com.freshervnc.utilityapplication.ui.video.EditVideoFragment
 import com.google.android.material.snackbar.Snackbar
 
@@ -49,7 +50,8 @@ class HomeFragment : Fragment() {
         binding.homeEditVideo.setOnClickListener {
             (activity as MainActivity).replaceFragment(EditVideoFragment())
         }
-        binding.homeEditOther.setOnClickListener {
+        binding.homePdfViewer.setOnClickListener {
+            (activity as MainActivity).replaceFragment(PdfViewerFragment())
         }
 
     }

@@ -1,12 +1,14 @@
 package com.freshervnc.utilityapplication.ui.photo
 
 
+import android.Manifest
 import android.app.Activity.RESULT_OK
 import android.content.ActivityNotFoundException
 import android.content.ContentValues
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Bitmap.CompressFormat
+import android.graphics.Color
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.ImageDecoder
@@ -25,13 +27,19 @@ import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
 import com.freshervnc.utilityapplication.R
 import com.freshervnc.utilityapplication.databinding.DialogAddStickerBinding
 import com.freshervnc.utilityapplication.databinding.DialogAddTextBinding
+import com.freshervnc.utilityapplication.databinding.DialogColorPickerBinding
 import com.freshervnc.utilityapplication.databinding.FragmentPhotoBinding
-import com.freshervnc.utilityapplication.ui.photo.adapter.ColorAdapter
-import com.freshervnc.utilityapplication.ui.photo.adapter.ColorListener
+import com.freshervnc.utilityapplication.ui.photo.adapter.ColorPickerAdapter
+import com.freshervnc.utilityapplication.ui.photo.adapter.ColorPickerListener
+import com.freshervnc.utilityapplication.ui.photo.adapter.ColorTextAdapter
+import com.freshervnc.utilityapplication.ui.photo.adapter.ColorTextListener
 import com.freshervnc.utilityapplication.ui.photo.adapter.StickerAdapter
 import com.freshervnc.utilityapplication.ui.photo.adapter.StickerListener
 import com.freshervnc.utilityapplication.ui.photo.draw.MyDrawView
@@ -40,17 +48,29 @@ import com.freshervnc.utilityapplication.ui.photo.sticker.StickerTextView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
-class PhotoFragment : Fragment(), StickerListener, ColorListener {
+class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPickerListener {
     private val CROP_IMAGE = 1
     private val LOAD_IMAGE_GALLARY = 2
     private lateinit var binding: FragmentPhotoBinding
     private val listEmojiIcon: MutableList<Int> = mutableListOf()
     private val listColor: MutableList<String> = mutableListOf()
-    private var colorStr : String = ""
+    private var colorText: String = "#FF000000"
+    private var colorPicker: String = "#FF000000"
+    private var colorSize: Float = 3f
     private var dialog: BottomSheetDialog? = null
-    private var imageUri : Uri? = null
+    private var dialogSticker: BottomSheetDialog? = null
+    private var dialogColorPicker: BottomSheetDialog? = null
+    private var imageUri: Uri? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -58,6 +78,7 @@ class PhotoFragment : Fragment(), StickerListener, ColorListener {
     ): View {
         // Inflate the layout for this fragment
         binding = FragmentPhotoBinding.inflate(layoutInflater, container, false)
+        onPermission()
         return binding.root
     }
 
@@ -94,7 +115,6 @@ class PhotoFragment : Fragment(), StickerListener, ColorListener {
                     binding.editCropImage.setOnClickListener {
                         cropImage(uri)
                     }
-                    saveImageToGallery(uri)
                 }
             }
 
@@ -125,26 +145,42 @@ class PhotoFragment : Fragment(), StickerListener, ColorListener {
         }
 
         binding.editDeleteImage.setOnClickListener {
-            binding.canvas.isDrawingCacheEnabled = true
-            binding.canvas.buildDrawingCache()
-            val bitmap = binding.canvas.drawingCache
-            try {
-                val rootFile = File(
-                    Environment.getExternalStorageDirectory()
-                        .toString() + File.separator + "MyImage" + File.separator
+            if (ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                    LOAD_IMAGE_GALLARY
                 )
-                rootFile.mkdirs()
-                val fileOutputStream = FileOutputStream(rootFile)
-                bitmap.compress(CompressFormat.PNG, 100, fileOutputStream)
-                fileOutputStream.flush()
-                fileOutputStream.close()
-                Toast.makeText(requireContext(),"Luu anh thanh cong",Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
+            } else {
+                saveFrameLayoutAsImage(binding.canvas)
             }
+//            binding.canvas.isDrawingCacheEnabled = true
+//            binding.canvas.buildDrawingCache()
+//            val bitmap = binding.canvas.drawingCache
+//
+//            try {
+//                val rootFile = File(
+//                    Environment.getExternalStorageDirectory()
+//                        .toString() + File.separator + "MyImage" + File.separator
+//                )
+//                rootFile.mkdirs()
+//                val fileOutputStream = FileOutputStream(rootFile)
+//                bitmap.compress(CompressFormat.PNG, 100, fileOutputStream)
+//                fileOutputStream.flush()
+//                fileOutputStream.close()
+//                Toast.makeText(requireContext(),"Luu anh thanh cong",Toast.LENGTH_SHORT).show()
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//                Toast.makeText(binding.canvas.context, "Failed to save image", Toast.LENGTH_SHORT).show()
+//            }
         }
     }
 
-    private fun cropImage(picUri : Uri?) {
+    private fun cropImage(picUri: Uri?) {
         try {
             val intent = Intent("com.android.camera.action.CROP")
             intent.setDataAndType(picUri, "image/*")
@@ -157,9 +193,10 @@ class PhotoFragment : Fragment(), StickerListener, ColorListener {
             intent.putExtra("return-data", true)
             startActivityForResult(intent, CROP_IMAGE)
         } catch (e: ActivityNotFoundException) {
-            Log.e("zzzz",e.message.toString())
+            Log.e("zzzz", e.message.toString())
         }
     }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == LOAD_IMAGE_GALLARY && resultCode == RESULT_OK) {
             cropImage(data?.data)
@@ -175,76 +212,83 @@ class PhotoFragment : Fragment(), StickerListener, ColorListener {
             }
         }
     }
+
     override fun onClickItem(position: Int) {
         val ivSticker = StickerImageView(requireContext())
         ivSticker.setImageResource(position)
         binding.canvas.addView(ivSticker)
         binding.photoLayOutButton.visibility = View.VISIBLE
-        dialog ?.dismiss()
-        listEmojiIcon  ?.clear()
+        dialogSticker?.dismiss()
+        listEmojiIcon.clear()
     }
 
     /* sticker emojicon */
-    private fun getListEmojicon(){
-        listEmojiIcon ?.add(R.drawable.icon_emoji)
-        listEmojiIcon ?.add(R.drawable.angry)
-        listEmojiIcon ?.add(R.drawable.dizzy)
-        listEmojiIcon ?.add(R.drawable.emoji)
-        listEmojiIcon ?.add(R.drawable.flame)
-        listEmojiIcon ?.add(R.drawable.kiss)
-        listEmojiIcon ?.add(R.drawable.quiet)
+    private fun getListEmojicon() {
+        listEmojiIcon.add(R.drawable.icon_emoji)
+        listEmojiIcon.add(R.drawable.angry)
+        listEmojiIcon.add(R.drawable.dizzy)
+        listEmojiIcon.add(R.drawable.emoji)
+        listEmojiIcon.add(R.drawable.flame)
+        listEmojiIcon.add(R.drawable.kiss)
+        listEmojiIcon.add(R.drawable.quiet)
     }
-    private fun addSticker(){
+
+    private fun addSticker() {
         val view = DialogAddStickerBinding.inflate(layoutInflater, null, false)
-        dialog = BottomSheetDialog(requireContext(), R.style.AppBottomSheetDialogTheme)
-        dialog ?.setContentView(view.root)
-        dialog ?.show()
+        dialogSticker = BottomSheetDialog(requireContext(), R.style.AppBottomSheetDialogTheme)
+        dialogSticker?.setContentView(view.root)
+        dialogSticker?.show()
+        dialogSticker?.setCancelable(false)
         getListEmojicon()
-        view.grView.visibility = View.VISIBLE
+        val adapter = StickerAdapter(requireContext(), listEmojiIcon, this)
         binding.photoLayOutButton.visibility = View.GONE
-        val adapter = StickerAdapter(requireContext(), listEmojiIcon!! , this)
         view.grView.adapter = adapter
     }
 
     /* add text */
-    private fun getListColor(){
-        listColor ?.add("#FF000000")
-        listColor ?.add("#FFFFFFFF")
-        listColor ?.add("#fcba03")
-        listColor ?.add("#2d8707")
-        listColor ?.add("#1aba95")
-        listColor ?.add("#0e5b9e")
-        listColor ?.add("#080bbf")
-        listColor ?.add("#9602f2")
-        listColor ?.add("#f20246")
-        listColor ?.add("#ff0008")
-        listColor ?.add("#423d3d")
-        listColor ?.add("#d6d6d6")
+    private fun getListColor() {
+        listColor.add("#FF000000")
+        listColor.add("#FFFFFFFF")
+        listColor.add("#fcba03")
+        listColor.add("#2d8707")
+        listColor.add("#1aba95")
+        listColor.add("#0e5b9e")
+        listColor.add("#080bbf")
+        listColor.add("#9602f2")
+        listColor.add("#f20246")
+        listColor.add("#ff0008")
+        listColor.add("#423d3d")
+        listColor.add("#d6d6d6")
     }
-    private fun addText(){
+
+    private fun addText() {
         val view = DialogAddTextBinding.inflate(layoutInflater, null, false)
         dialog = BottomSheetDialog(requireContext(), R.style.AppBottomSheetDialogTheme)
-        dialog ?.setContentView(view.root)
-        dialog ?.show()
+        dialog?.setContentView(view.root)
+        dialog?.show()
+        dialog?.setCancelable(false)
         getListColor()
-        val adapter = ColorAdapter(listColor!! , this)
+        val adapter = ColorTextAdapter(listColor, this)
         view.rcListColor.adapter = adapter
         val tvSticker = StickerTextView(requireContext())
-        tvSticker.setTextColor("#000000")
         view.dialogTextBtnSave.setOnClickListener {
             tvSticker.setText(view.dialogTextEdText.text.toString())
-            tvSticker.setTextColor(colorStr)
+            tvSticker.setTextColor(colorText)
             binding.canvas.addView(tvSticker)
-            dialog ?.dismiss()
+            dialog?.dismiss()
+        }
+        view.dialogTextBtnExit.setOnClickListener {
+            dialog?.dismiss()
+            listColor.clear()
         }
     }
-    override fun onClickItem(position: String) {
-        colorStr = position
+
+    override fun onClickItemColorText(position: String) {
+        colorText = position
     }
 
     /* change image background black-white */
-    private fun getImageColorWhiteBlack(){
-        // Tạo BitmapDrawable từ hình ảnh gốc
+    private fun getImageColorWhiteBlack() {
         val source = ImageDecoder.createSource(requireActivity().contentResolver, imageUri!!)
         val bitmap = ImageDecoder.decodeBitmap(source)
         val drawable = BitmapDrawable(resources, bitmap)
@@ -257,21 +301,66 @@ class PhotoFragment : Fragment(), StickerListener, ColorListener {
     }
 
     /* draw paint overlay image */
-    private fun getDrawPaint(){
-        val myDrawView = MyDrawView(requireContext())
+    private fun getDrawPaint() { getShowSettingDraw() }
+
+    private fun getShowSettingDraw() {
+        var myDrawView = MyDrawView(requireContext(), Color.parseColor(colorPicker), colorSize)
+        myDrawView.clear()
         binding.canvas.addView(myDrawView)
+        binding.photoIconShowHide.setOnClickListener {
+            binding.photoLayoutColor.visibility = View.GONE
+            binding.photoLayOutButton.visibility = View.VISIBLE
+        }
+        binding.photoIconPickColor.setOnClickListener {
+            myDrawView.clear()
+            dialogColorPicker()
+        }
+        binding.photoIconReverse.setOnClickListener {
+            myDrawView.clear()
+            getShowSettingDraw()
+        }
+        binding.photoIconDelete.setOnClickListener {
+            binding.canvas.removeView(myDrawView)
+            myDrawView = MyDrawView(requireContext(), Color.parseColor(colorPicker), colorSize)
+            binding.canvas.addView(myDrawView)
+        }
     }
 
+    private fun dialogColorPicker() {
+        val view = DialogColorPickerBinding.inflate(layoutInflater, null, false)
+        dialogColorPicker = BottomSheetDialog(requireContext(), R.style.AppBottomSheetDialogTheme)
+        dialogColorPicker?.setContentView(view.root)
+        dialogColorPicker?.show()
+        dialogColorPicker?.setCancelable(false)
+        getListColor()
+        val manager = GridLayoutManager(requireContext(), 4)
+        view.rcListColor.layoutManager = manager
+        val adapter = ColorPickerAdapter(listColor, this)
+        view.rcListColor.adapter = adapter
+    }
 
+    override fun onClickItemColorPicker(position: String) {
+        colorPicker = position
+        val myDrawView = MyDrawView(requireContext(), Color.parseColor(colorPicker), colorSize)
+        binding.canvas.addView(myDrawView)
+        dialogColorPicker?.dismiss()
+        listColor.clear()
+    }
+
+    /*Save image */
     private fun saveImageToGallery(imageUri: Uri) {
         val contentValues = ContentValues().apply {
             put(MediaStore.Images.Media.DISPLAY_NAME, "my_image_${System.currentTimeMillis()}.jpg")
             put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-            put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/MyAppImages")
+            put(
+                MediaStore.Images.Media.RELATIVE_PATH,
+                Environment.DIRECTORY_PICTURES + "/MyAppImages"
+            )
         }
 
         val resolver = requireActivity().contentResolver
-        val imageCollection = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        val imageCollection =
+            MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
         val newImageUri = resolver.insert(imageCollection, contentValues)
 
         newImageUri?.let { outputStreamUri ->
@@ -282,4 +371,54 @@ class PhotoFragment : Fragment(), StickerListener, ColorListener {
             }
         }
     }
+
+    fun saveFrameLayoutAsImage(frameLayout: FrameLayout) {
+        frameLayout.isDrawingCacheEnabled = true
+        val bitmap = Bitmap.createBitmap(frameLayout.drawingCache)
+        frameLayout.isDrawingCacheEnabled = false
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val fileName = "IMG_$timeStamp.jpg"
+        val storageDir =
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+        val imageFile = File(storageDir, fileName)
+        try {
+            val outputStream = FileOutputStream(imageFile)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+            outputStream.flush()
+            outputStream.close()
+            Toast.makeText(
+                frameLayout.context,
+                "Image saved to ${imageFile.absolutePath}",
+                Toast.LENGTH_SHORT
+            ).show()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            Toast.makeText(frameLayout.context, "Failed to save image", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /*Get permission*/
+    fun onPermission() {
+        if ((ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(
+                    Manifest.permission.READ_CONTACTS,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.BLUETOOTH,
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.CALL_PHONE
+                ),
+                0
+            )
+        }
+    }
+
 }

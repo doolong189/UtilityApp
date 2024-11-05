@@ -1,19 +1,13 @@
 package com.freshervnc.utilityapplication.ui.photo.adapter
 
-import android.content.Context
 import android.graphics.Color
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.freshervnc.utilityapplication.R
 import com.freshervnc.utilityapplication.databinding.ListColorBinding
 
 
-class ColorAdapter(private var items: List<String>, private val listener: ColorListener?) : RecyclerView.Adapter<ColorAdapter.MyViewHolder>() {
+class ColorTextAdapter(private var items: List<String>, private val listener: ColorTextListener?) : RecyclerView.Adapter<ColorTextAdapter.MyViewHolder>() {
 
     inner class MyViewHolder(val binding: ListColorBinding) : RecyclerView.ViewHolder(binding.root)
 
@@ -22,12 +16,12 @@ class ColorAdapter(private var items: List<String>, private val listener: ColorL
         return MyViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: ColorAdapter.MyViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ColorTextAdapter.MyViewHolder, position: Int) {
         with(holder) {
             val item = items[position]
             binding.itemColor.setBackgroundColor(Color.parseColor(item))
             holder.itemView.setOnClickListener {
-                listener ?.onClickItem(item)
+                listener ?.onClickItemColorText(item)
             }
         }
     }
