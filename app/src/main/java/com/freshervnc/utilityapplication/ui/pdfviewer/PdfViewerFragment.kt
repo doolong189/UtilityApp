@@ -1,6 +1,4 @@
 package com.freshervnc.utilityapplication.ui.pdfviewer
-
-import android.app.Activity.FOCUSED_STATE_SET
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
@@ -19,6 +17,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.freshervnc.utilityapplication.R
 import com.freshervnc.utilityapplication.databinding.DialogChooseConvertPdfBinding
+import com.freshervnc.utilityapplication.databinding.DialogCreatePdfBinding
 import com.freshervnc.utilityapplication.databinding.FragmentPdfViewerBinding
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.io.File
@@ -73,26 +72,6 @@ class PdfViewerFragment : Fragment() {
                 startActivityForResult(intent, PICK_PDF_FILE)
             }
         }
-
-        binding.btnNext.setOnClickListener {
-            if (position < mArrayUri.size - 1) {
-                position++
-                binding.outputImage.setImageURI(mArrayUri[position])
-            } else {
-                Toast.makeText(requireContext(), "Last Image Already Shown", Toast.LENGTH_SHORT)
-                    .show()
-            }
-        }
-
-        binding.btnPrevious.setOnClickListener {
-            if (position > 0) {
-                position--
-                binding.outputImage.setImageURI(mArrayUri[position])
-            } else {
-                Toast.makeText(requireContext(), "First Image Already Shown", Toast.LENGTH_SHORT)
-                    .show()
-            }
-        }
     }
 
     private fun selectImage() {
@@ -137,17 +116,21 @@ class PdfViewerFragment : Fragment() {
                 mArrayUri.add(imageUrl)
                 binding.outputImage.setImageURI(mArrayUri[0])
                 position = 0
-                val bitmap =
-                    MediaStore.Images.Media.getBitmap(requireActivity().contentResolver, imageUrl)
+                val bitmap = MediaStore.Images.Media.getBitmap(requireActivity().contentResolver, imageUrl)
                 bitmaps.add(bitmap)
             }
-            binding.btnImageToPdf.setOnClickListener {
-                createPdf(bitmaps)
+            binding.pdfViewerFlConvert.visibility = View.VISIBLE
+            binding.pdfViewerFlConvert.setOnClickListener {
+                val view = DialogCreatePdfBinding.inflate(layoutInflater, null, false)
+                val dialog = BottomSheetDialog(requireContext(), R.style.AppBottomSheetDialogTheme)
+                dialog.setContentView(view.root)
+                dialog.show()
+//                createPdf(bitmaps)
             }
+            dialog ?.dismiss()
         } else {
             Toast.makeText(requireContext(), "You haven't picked Image", Toast.LENGTH_LONG).show()
         }
-
     }
 
     private fun createPdf(bitmaps: MutableList<Bitmap>) {

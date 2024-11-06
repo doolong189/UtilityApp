@@ -14,25 +14,24 @@
         <ImageView
             android:id="@+id/outputImage"
             android:layout_width="match_parent"
-            android:layout_height="200dp" />
-        <Button
-            android:id="@+id/btnPrevious"
-            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/pdf_viewer_flConvert"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="previous"
-            android:layout_below="@id/outputImage"/>
-        <Button
-            android:id="@+id/btnNext"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Next"
-            android:layout_below="@id/btnPrevious"/>
-        <Button
-            android:id="@+id/btnImageToPdf"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Convert Image To Pdf"
-            android:layout_below="@id/btnNext"/>
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="10dp"
+            android:backgroundTint="#FF5722"
+            android:text="Convert"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:drawableEnd="@drawable/baseline_done_24"
+            android:drawablePadding="10dp"
+            android:background="@drawable/bg_custom"
+            android:padding="10dp"
+            android:visibility="gone"
+            />
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/pdf_viewer_flBtn"
             android:layout_width="wrap_content"

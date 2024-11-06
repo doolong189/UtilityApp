@@ -14,6 +14,7 @@ import android.graphics.ColorMatrixColorFilter
 import android.graphics.ImageDecoder
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -158,25 +159,6 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
             } else {
                 saveFrameLayoutAsImage(binding.canvas)
             }
-//            binding.canvas.isDrawingCacheEnabled = true
-//            binding.canvas.buildDrawingCache()
-//            val bitmap = binding.canvas.drawingCache
-//
-//            try {
-//                val rootFile = File(
-//                    Environment.getExternalStorageDirectory()
-//                        .toString() + File.separator + "MyImage" + File.separator
-//                )
-//                rootFile.mkdirs()
-//                val fileOutputStream = FileOutputStream(rootFile)
-//                bitmap.compress(CompressFormat.PNG, 100, fileOutputStream)
-//                fileOutputStream.flush()
-//                fileOutputStream.close()
-//                Toast.makeText(requireContext(),"Luu anh thanh cong",Toast.LENGTH_SHORT).show()
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//                Toast.makeText(binding.canvas.context, "Failed to save image", Toast.LENGTH_SHORT).show()
-//            }
         }
     }
 
@@ -301,7 +283,9 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
     }
 
     /* draw paint overlay image */
-    private fun getDrawPaint() { getShowSettingDraw() }
+    private fun getDrawPaint() {
+        getShowSettingDraw()
+    }
 
     private fun getShowSettingDraw() {
         var myDrawView = MyDrawView(requireContext(), Color.parseColor(colorPicker), colorSize)
@@ -345,6 +329,8 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
         binding.canvas.addView(myDrawView)
         dialogColorPicker?.dismiss()
         listColor.clear()
+        getShowSettingDraw()
+
     }
 
     /*Save image */
@@ -376,10 +362,23 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
         frameLayout.isDrawingCacheEnabled = true
         val bitmap = Bitmap.createBitmap(frameLayout.drawingCache)
         frameLayout.isDrawingCacheEnabled = false
+
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val fileName = "IMG_$timeStamp.jpg"
-        val storageDir =
+
+        // Check if running on an emulator
+        val isEmulator = Build.FINGERPRINT.contains("generic") ||
+                Build.MODEL.contains("Emulator") ||
+                Build.MANUFACTURER.contains("Genymotion") ||
+                (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+
+        // Choose storage directory based on device type
+        val storageDir = if (isEmulator) {
+            File(requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.absolutePath + "/wrapper" + "/data" + fileName)
+        } else {
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+        }
+
         val imageFile = File(storageDir, fileName)
         try {
             val outputStream = FileOutputStream(imageFile)
@@ -397,13 +396,17 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
         }
     }
 
+
     /*Get permission*/
     fun onPermission() {
         if ((ContextCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             )) !=
-            PackageManager.PERMISSION_GRANTED
+            PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
                 requireActivity(),
@@ -414,7 +417,8 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.BLUETOOTH,
                     Manifest.permission.CAMERA,
-                    Manifest.permission.CALL_PHONE
+                    Manifest.permission.CALL_PHONE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
                 ),
                 0
             )
