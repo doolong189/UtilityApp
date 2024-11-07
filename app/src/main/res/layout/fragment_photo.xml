@@ -70,13 +70,6 @@
                     android:src="@drawable/baseline_text_fields_24"
                     android:layout_margin="5dp"/>
                 <ImageView
-                    android:id="@+id/edit_cropImage"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:src="@drawable/baseline_crop_24"
-                    android:layout_margin="5dp"/>
-                <ImageView
                     android:id="@+id/edit_changeBackground"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -103,6 +96,13 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:src="@drawable/baseline_delete_24"
+                    android:layout_margin="5dp"/>
+                <ImageView
+                    android:id="@+id/edit_saveImage"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:src="@drawable/baseline_save_alt_24"
                     android:layout_margin="5dp"/>
             </LinearLayout>
             <androidx.appcompat.widget.AppCompatButton

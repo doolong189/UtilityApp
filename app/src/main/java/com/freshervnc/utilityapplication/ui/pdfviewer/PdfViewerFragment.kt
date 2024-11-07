@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CompoundButton
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.freshervnc.utilityapplication.R
@@ -80,12 +81,9 @@ class PdfViewerFragment : Fragment() {
             intent.type = "image/*"
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
             intent.action = Intent.ACTION_GET_CONTENT
-            startActivityForResult(
-                Intent.createChooser(intent, "Select Picture")
-                , PICK_IMAGE_MULTIPLE
-            )
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_MULTIPLE)
         } else {
-            var intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
             intent.addCategory(Intent.CATEGORY_OPENABLE)
             intent.type = "image/*"
@@ -125,7 +123,22 @@ class PdfViewerFragment : Fragment() {
                 val dialog = BottomSheetDialog(requireContext(), R.style.AppBottomSheetDialogTheme)
                 dialog.setContentView(view.root)
                 dialog.show()
-//                createPdf(bitmaps)
+                val random = (0..100000).shuffled().last()
+                view.dialogCreatePdfEdFileName.setText("Utility_random_$random")
+                view.dialogCreatePdfBtnConvert.setOnClickListener {
+                    createPdf(bitmaps , view.dialogCreatePdfEdFileName.text.toString())
+                    dialog.dismiss()
+                }
+                view.dialogCreatePdfSwPassword.setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener { buttonView, isChecked ->
+                    // do something, the isChecked will be
+                    // true if the switch is in the On position
+                    if (isChecked){
+                        view.dialogCreatePdfEdPassword.visibility = View.VISIBLE
+                    }else
+                    {
+                        view.dialogCreatePdfEdPassword.visibility = View.GONE
+                    }
+                })
             }
             dialog ?.dismiss()
         } else {
@@ -133,7 +146,7 @@ class PdfViewerFragment : Fragment() {
         }
     }
 
-    private fun createPdf(bitmaps: MutableList<Bitmap>) {
+    private fun createPdf(bitmaps: MutableList<Bitmap> , filePath : String) {
         if (bitmaps.isEmpty()) {
             Toast.makeText(requireContext(), "No images selected", Toast.LENGTH_SHORT).show()
             return
@@ -152,7 +165,7 @@ class PdfViewerFragment : Fragment() {
             // Lưu PDF
             val pdfFile = File(
                 requireContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),
-                "pdf_image.pdf"
+                filePath + ".pdf"
             )
             FileOutputStream(pdfFile).use { outputStream ->
                 pdfDocument.writeTo(outputStream)
@@ -181,7 +194,7 @@ class PdfViewerFragment : Fragment() {
         binding.outputImage.setImageURI(allImages[0])
         position = 0
     }
-    fun getAllImagesFromGallery(context: Context): List<Uri> {
+    private fun getAllImagesFromGallery(context: Context): List<Uri> {
         val uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
         val projection = arrayOf(MediaStore.Images.Media._ID)
 

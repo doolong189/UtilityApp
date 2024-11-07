@@ -39,7 +39,6 @@ class EditVideoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         action()
-        loadVideo()
     }
 
     private fun action() {
@@ -51,17 +50,20 @@ class EditVideoFragment : Fragment() {
             registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
                 binding.videoVideoView.setVideoURI(uri)
                 binding.videoVideoView.start()
+                binding.videoLayoutOptions.visibility = View.VISIBLE
+                binding.videoBtnSelectVideo.visibility = View.GONE
+                binding.videoPgLoading.visibility = View.GONE
             }
         binding.videoBtnSelectVideo.setOnClickListener {
             singleVideoLauncher.launch(
                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly)
             )
+            binding.videoPgLoading.visibility = View.GONE
         }
     }
 
     private fun loadVideo() {
         binding.videoVideoView.setVideoURI(Uri.parse("android.resource://" + requireActivity().packageName + "/" + R.raw.video))
-        // binding.videoVideoView.setVideoPath("https://github.com/Coding-Meet/Change-Theme-And-Font-App/raw/master/video/video.mp4")
         val mediaController = MediaController(requireContext())
         binding.videoVideoView.setMediaController(mediaController)
         mediaController.setAnchorView(binding.videoVideoView)

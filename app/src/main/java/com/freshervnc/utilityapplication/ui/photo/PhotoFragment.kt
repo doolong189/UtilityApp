@@ -2,6 +2,7 @@ package com.freshervnc.utilityapplication.ui.photo
 
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.ActivityNotFoundException
 import android.content.ContentValues
@@ -59,19 +60,17 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
     private val CROP_IMAGE = 1
     private val LOAD_IMAGE_GALLARY = 2
     private lateinit var binding: FragmentPhotoBinding
-    private val listEmojiIcon: MutableList<Int> = mutableListOf()
-    private val listColor: MutableList<String> = mutableListOf()
-    private var colorText: String = "#FF000000"
-    private var colorPicker: String = "#FF000000"
+    private val listEmojiIcon: MutableList<Int> =
+        arrayListOf(R.drawable.icon_emoji,R.drawable.angry,R.drawable.dizzy,R.drawable.emoji,R.drawable.flame, R.drawable.kiss , R.drawable.quiet)
+    private val listColor: MutableList<String> = arrayListOf("#FF0000","#FFFFFF","#FCBA03","#2D8707",
+        "#1ABA95","#0E5B9E","#080BBF","#9602F2","#F20246","#FF0008","#423D3D","#D6D6D6")
+    private var colorText: String = "#FF0000"
+    private var colorPicker: String = "#FF0000"
     private var colorSize: Float = 3f
     private var dialog: BottomSheetDialog? = null
     private var dialogSticker: BottomSheetDialog? = null
     private var dialogColorPicker: BottomSheetDialog? = null
     private var imageUri: Uri? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -94,28 +93,20 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
                 uri?.let {
                     imageUri = uri
                     binding.photoImageView.setImageURI(uri)
-                    val cursor =
-                        requireActivity().contentResolver.query(uri, null, null, null, null)
+                    val cursor = requireActivity().contentResolver.query(uri, null, null, null, null)
                     cursor?.use {
                         val sizeIndex = it.getColumnIndex(OpenableColumns.SIZE)
                         it.moveToFirst()
                         val fileSize = it.getLong(sizeIndex)
                         val filePath = uri.path ?: "Không lấy được đường dẫn"
                         binding.photoTvFilePath.text = "Đường dẫn: $filePath"
+
                         binding.photoImgInfoFilePath.setOnClickListener {
-                            val mAlertDialog = AlertDialog.Builder(requireContext())
-                            mAlertDialog.setMessage("Đường dẫn: $filePath\nKích thước: ${fileSize / 1024} KB")
-                            mAlertDialog.setPositiveButton("OK") { dialog, id ->
-                                dialog.dismiss()
-                            }
-                            mAlertDialog.show()
+                            getDetailInfoImage(filePath,fileSize)
                         }
                     }
                     binding.photoBtnSelectImage.visibility = View.GONE
                     binding.photoLayOutButton.visibility = View.VISIBLE
-                    binding.editCropImage.setOnClickListener {
-                        cropImage(uri)
-                    }
                 }
             }
 
@@ -124,6 +115,7 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
             )
         }
+
         binding.editAddText.setOnClickListener {
             addText()
         }
@@ -137,46 +129,20 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
 
         binding.editPaintDraw.setOnClickListener {
             getDrawPaint()
-            binding.photoLayoutColor.visibility = View.VISIBLE
-            binding.photoLayOutButton.visibility = View.GONE
         }
 
-        binding.editBlurImage.setOnClickListener {
-
-        }
-
-        binding.editDeleteImage.setOnClickListener {
-            if (ContextCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                ActivityCompat.requestPermissions(
-                    requireActivity(),
-                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                    LOAD_IMAGE_GALLARY
-                )
-            } else {
-                saveFrameLayoutAsImage(binding.canvas)
-            }
+        binding.editSaveImage.setOnClickListener {
+            saveImage()
         }
     }
 
-    private fun cropImage(picUri: Uri?) {
-        try {
-            val intent = Intent("com.android.camera.action.CROP")
-            intent.setDataAndType(picUri, "image/*")
-            intent.putExtra("crop", "true")
-            intent.putExtra("outputX", 250)
-            intent.putExtra("outputY", 250)
-            intent.putExtra("aspectX", 3)
-            intent.putExtra("aspectY", 4)
-            intent.putExtra("scaleUpIfNeeded", true)
-            intent.putExtra("return-data", true)
-            startActivityForResult(intent, CROP_IMAGE)
-        } catch (e: ActivityNotFoundException) {
-            Log.e("zzzz", e.message.toString())
+    private fun getDetailInfoImage(filePath: String, fileSize: Long){
+        val mAlertDialog = AlertDialog.Builder(requireContext())
+        mAlertDialog.setMessage("Đường dẫn: $filePath\nKích thước: ${fileSize / 1024} KB")
+        mAlertDialog.setPositiveButton("OK") { dialog, id ->
+            dialog.dismiss()
         }
+        mAlertDialog.show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -195,25 +161,6 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
         }
     }
 
-    override fun onClickItem(position: Int) {
-        val ivSticker = StickerImageView(requireContext())
-        ivSticker.setImageResource(position)
-        binding.canvas.addView(ivSticker)
-        binding.photoLayOutButton.visibility = View.VISIBLE
-        dialogSticker?.dismiss()
-        listEmojiIcon.clear()
-    }
-
-    /* sticker emojicon */
-    private fun getListEmojicon() {
-        listEmojiIcon.add(R.drawable.icon_emoji)
-        listEmojiIcon.add(R.drawable.angry)
-        listEmojiIcon.add(R.drawable.dizzy)
-        listEmojiIcon.add(R.drawable.emoji)
-        listEmojiIcon.add(R.drawable.flame)
-        listEmojiIcon.add(R.drawable.kiss)
-        listEmojiIcon.add(R.drawable.quiet)
-    }
 
     private fun addSticker() {
         val view = DialogAddStickerBinding.inflate(layoutInflater, null, false)
@@ -221,35 +168,16 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
         dialogSticker?.setContentView(view.root)
         dialogSticker?.show()
         dialogSticker?.setCancelable(false)
-        getListEmojicon()
         val adapter = StickerAdapter(requireContext(), listEmojiIcon, this)
         binding.photoLayOutButton.visibility = View.GONE
         view.grView.adapter = adapter
     }
-
-    /* add text */
-    private fun getListColor() {
-        listColor.add("#FF000000")
-        listColor.add("#FFFFFFFF")
-        listColor.add("#fcba03")
-        listColor.add("#2d8707")
-        listColor.add("#1aba95")
-        listColor.add("#0e5b9e")
-        listColor.add("#080bbf")
-        listColor.add("#9602f2")
-        listColor.add("#f20246")
-        listColor.add("#ff0008")
-        listColor.add("#423d3d")
-        listColor.add("#d6d6d6")
-    }
-
     private fun addText() {
         val view = DialogAddTextBinding.inflate(layoutInflater, null, false)
         dialog = BottomSheetDialog(requireContext(), R.style.AppBottomSheetDialogTheme)
         dialog?.setContentView(view.root)
         dialog?.show()
         dialog?.setCancelable(false)
-        getListColor()
         val adapter = ColorTextAdapter(listColor, this)
         view.rcListColor.adapter = adapter
         val tvSticker = StickerTextView(requireContext())
@@ -261,15 +189,9 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
         }
         view.dialogTextBtnExit.setOnClickListener {
             dialog?.dismiss()
-            listColor.clear()
         }
     }
-
-    override fun onClickItemColorText(position: String) {
-        colorText = position
-    }
-
-    /* change image background black-white */
+    @SuppressLint("NewApi")
     private fun getImageColorWhiteBlack() {
         val source = ImageDecoder.createSource(requireActivity().contentResolver, imageUri!!)
         val bitmap = ImageDecoder.decodeBitmap(source)
@@ -281,12 +203,11 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
         drawable.colorFilter = filter
         binding.photoImageView.setImageDrawable(drawable)
     }
-
-    /* draw paint overlay image */
     private fun getDrawPaint() {
         getShowSettingDraw()
+        binding.photoLayoutColor.visibility = View.VISIBLE
+        binding.photoLayOutButton.visibility = View.GONE
     }
-
     private fun getShowSettingDraw() {
         var myDrawView = MyDrawView(requireContext(), Color.parseColor(colorPicker), colorSize)
         myDrawView.clear()
@@ -309,6 +230,17 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
             binding.canvas.addView(myDrawView)
         }
     }
+    override fun onClickItem(position: Int) {
+        val ivSticker = StickerImageView(requireContext())
+        ivSticker.setImageResource(position)
+        binding.canvas.addView(ivSticker)
+        binding.photoLayOutButton.visibility = View.VISIBLE
+        dialogSticker?.dismiss()
+    }
+
+    override fun onClickItemColorText(position: String , position1: Int) {
+        colorText = position
+    }
 
     private fun dialogColorPicker() {
         val view = DialogColorPickerBinding.inflate(layoutInflater, null, false)
@@ -316,7 +248,6 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
         dialogColorPicker?.setContentView(view.root)
         dialogColorPicker?.show()
         dialogColorPicker?.setCancelable(false)
-        getListColor()
         val manager = GridLayoutManager(requireContext(), 4)
         view.rcListColor.layoutManager = manager
         val adapter = ColorPickerAdapter(listColor, this)
@@ -328,37 +259,11 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
         val myDrawView = MyDrawView(requireContext(), Color.parseColor(colorPicker), colorSize)
         binding.canvas.addView(myDrawView)
         dialogColorPicker?.dismiss()
-        listColor.clear()
         getShowSettingDraw()
 
     }
 
-    /*Save image */
-    private fun saveImageToGallery(imageUri: Uri) {
-        val contentValues = ContentValues().apply {
-            put(MediaStore.Images.Media.DISPLAY_NAME, "my_image_${System.currentTimeMillis()}.jpg")
-            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-            put(
-                MediaStore.Images.Media.RELATIVE_PATH,
-                Environment.DIRECTORY_PICTURES + "/MyAppImages"
-            )
-        }
-
-        val resolver = requireActivity().contentResolver
-        val imageCollection =
-            MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
-        val newImageUri = resolver.insert(imageCollection, contentValues)
-
-        newImageUri?.let { outputStreamUri ->
-            resolver.openOutputStream(outputStreamUri)?.use { outputStream ->
-                resolver.openInputStream(imageUri)?.use { inputStream ->
-                    inputStream.copyTo(outputStream)
-                }
-            }
-        }
-    }
-
-    fun saveFrameLayoutAsImage(frameLayout: FrameLayout) {
+    private fun saveFrameLayoutAsImage(frameLayout: FrameLayout) {
         frameLayout.isDrawingCacheEnabled = true
         val bitmap = Bitmap.createBitmap(frameLayout.drawingCache)
         frameLayout.isDrawingCacheEnabled = false
@@ -396,9 +301,7 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
         }
     }
 
-
-    /*Get permission*/
-    fun onPermission() {
+    private fun onPermission() {
         if ((ContextCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -425,4 +328,36 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
         }
     }
 
+    private fun cropImage(picUri: Uri?) {
+        try {
+            val intent = Intent("com.android.camera.action.CROP")
+            intent.setDataAndType(picUri, "image/*")
+            intent.putExtra("crop", "true")
+            intent.putExtra("outputX", 250)
+            intent.putExtra("outputY", 250)
+            intent.putExtra("aspectX", 3)
+            intent.putExtra("aspectY", 4)
+            intent.putExtra("scaleUpIfNeeded", true)
+            intent.putExtra("return-data", true)
+            startActivityForResult(intent, CROP_IMAGE)
+        } catch (e: ActivityNotFoundException) {
+            Log.e("zzzz", e.message.toString())
+        }
+    }
+
+    private fun saveImage(){
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                LOAD_IMAGE_GALLARY
+            )
+        } else {
+            saveFrameLayoutAsImage(binding.canvas)
+        }
+    }
 }

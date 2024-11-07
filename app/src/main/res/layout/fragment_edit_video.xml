@@ -14,6 +14,8 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:id="@+id/top"
+            android:layout_above="@id/video_btnSelectVideo"
             >
             <VideoView
                 android:id="@+id/video_videoView"
@@ -25,7 +27,8 @@
                 android:id="@+id/video_pgLoading"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"/>
+                android:layout_centerInParent="true"
+                android:visibility="gone"/>
         </RelativeLayout>
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/video_btnSelectVideo"
@@ -37,5 +40,71 @@
             android:textColor="@color/white"
             android:background="@drawable/bg_custom"
             />
+        <LinearLayout
+            android:id="@+id/video_layoutOptions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="5dp"
+            android:gravity="center"
+            android:background="#000000"
+            android:visibility="gone">
+            <ImageView
+                android:id="@+id/photo_iconCut"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/baseline_content_cut_24"
+                android:layout_margin="5dp"/>
+            <ImageView
+                android:id="@+id/photo_iconMusic"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/baseline_music_note_24"
+                android:layout_margin="5dp"/>
+            <ImageView
+                android:id="@+id/photo_iconInsertText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/baseline_text_fields_24_white"
+                android:layout_margin="5dp"/>
+            <ImageView
+                android:id="@+id/photo_iconEmojicon"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/baseline_insert_emoticon_24_white"
+                android:layout_margin="5dp"/>
+            <ImageView
+                android:id="@+id/photo_iconCrop"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/baseline_crop_24_white"
+                android:layout_margin="5dp"/>
+            <ImageView
+                android:id="@+id/photo_iconInsertImage"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/baseline_photo_library_24"
+                android:layout_margin="5dp"/>
+            <ImageView
+                android:id="@+id/photo_iconSpeedVideo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/baseline_speed_24"
+                android:layout_margin="5dp"/>
+            <ImageView
+                android:id="@+id/photo_iconRotateRight"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/baseline_rotate_right_24"
+                android:layout_margin="5dp"/>
+        </LinearLayout>
     </LinearLayout>
 </FrameLayout>
