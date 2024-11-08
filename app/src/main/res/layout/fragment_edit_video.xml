@@ -5,17 +5,16 @@
     android:layout_height="match_parent"
     tools:context=".ui.video.EditVideoFragment">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         >
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="match_parent"
             android:id="@+id/top"
-            android:layout_above="@id/video_btnSelectVideo"
+            android:layout_above="@id/video_layoutOptions"
             >
             <VideoView
                 android:id="@+id/video_videoView"
@@ -39,6 +38,7 @@
             android:textStyle="bold"
             android:textColor="@color/white"
             android:background="@drawable/bg_custom"
+            android:layout_alignParentBottom="true"
             />
         <LinearLayout
             android:id="@+id/video_layoutOptions"
@@ -48,7 +48,8 @@
             android:padding="5dp"
             android:gravity="center"
             android:background="#000000"
-            android:visibility="gone">
+            android:visibility="gone"
+            android:layout_alignParentBottom="true">
             <ImageView
                 android:id="@+id/photo_iconCut"
                 android:layout_width="0dp"
@@ -106,5 +107,5 @@
                 android:src="@drawable/baseline_rotate_right_24"
                 android:layout_margin="5dp"/>
         </LinearLayout>
-    </LinearLayout>
+    </RelativeLayout>
 </FrameLayout>

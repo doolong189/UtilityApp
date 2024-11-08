@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.photo.PhotoFragment">
 
     <LinearLayout
@@ -105,6 +106,25 @@
                     android:src="@drawable/baseline_save_alt_24"
                     android:layout_margin="5dp"/>
             </LinearLayout>
+            <LinearLayout
+                android:id="@+id/photo_layoutPenSize"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="5dp"
+                android:gravity="center"
+                android:visibility="gone"
+                >
+                <androidx.cardview.widget.CardView
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
+                    app:cardCornerRadius="50dp"
+                    android:backgroundTint="@color/green"/>
+                <SeekBar
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    />
+            </LinearLayout>
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/photo_btnSelectImage"
                 android:layout_width="match_parent"
@@ -115,6 +135,7 @@
                 android:textColor="@color/white"
                 android:background="@drawable/bg_custom"
                 android:layout_margin="5dp"
+                android:visibility="visible"
                 />
             <LinearLayout
                 android:id="@+id/photo_layoutColor"
@@ -162,6 +183,7 @@
                     android:src="@drawable/baseline_arrow_drop_down_24"
                     android:layout_margin="5dp"/>
             </LinearLayout>
+
         </RelativeLayout>
     </LinearLayout>
 </FrameLayout>

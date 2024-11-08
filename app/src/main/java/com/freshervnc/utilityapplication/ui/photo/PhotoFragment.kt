@@ -272,17 +272,19 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
         val fileName = "IMG_$timeStamp.jpg"
 
         // Check if running on an emulator
-        val isEmulator = Build.FINGERPRINT.contains("generic") ||
-                Build.MODEL.contains("Emulator") ||
-                Build.MANUFACTURER.contains("Genymotion") ||
-                (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+//        val isEmulator = Build.FINGERPRINT.contains("generic") ||
+//                Build.MODEL.contains("Emulator") ||
+//                Build.MANUFACTURER.contains("Genymotion") ||
+//                (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+//
+//        // Choose storage directory based on device type
+//        val storageDir = if (isEmulator) {
+//            File(requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.absolutePath + "/wrapper" + "/data" + fileName)
+//        } else {
+//            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+//        }
+        val storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
 
-        // Choose storage directory based on device type
-        val storageDir = if (isEmulator) {
-            File(requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.absolutePath + "/wrapper" + "/data" + fileName)
-        } else {
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-        }
 
         val imageFile = File(storageDir, fileName)
         try {
@@ -360,4 +362,5 @@ class PhotoFragment : Fragment(), StickerListener, ColorTextListener, ColorPicke
             saveFrameLayoutAsImage(binding.canvas)
         }
     }
+
 }
